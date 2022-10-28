@@ -3,7 +3,7 @@ console.log('content script starts');
 // ====== Utilities ======
 
 let getCurrentPage=()=>{
-    let match=window.location.href.match(/([\w]+)\.com/);
+    let match=window.location.href.match(/([\w]+)\.(com|jp)/);
     let site=match && match[1];
     let page;
 
@@ -18,6 +18,7 @@ let getCurrentPage=()=>{
         case 'discogs':
         case 'soundcloud':
         case 'apple':
+        case 'ototoy':
             page=site;
             break;
     }
@@ -171,9 +172,33 @@ let collectMeta=(currentPage) => {
            return collectSoundcloudMeta();
         case "apple":
             return collectAppleMeta();
+        case "ototoy":
+            return collectOtotoyMeta();
         default:
             return null
     }
+}
+
+let collectOtotoyMeta=() => {
+    out = {
+        'url':document.URL,
+        'album':document.getElementsByClassName("album-title")[0].textContent.trim(),
+        'barcode':null,
+        'albumAltName'  : null,
+        "artists": Array.from(document.getElementsByClassName("album-artist")[0].children).map((item)=>item.textContent.trim()),
+        'genre':"Pop",
+        'releaseType': 'Single',
+        'media': 'Digital',
+        'date': document.getElementsByClassName("release-day")[0].textContent.trim().match('\\d{4}-\\d{2}-\\d{2}')[0],
+        'label':document.getElementsByClassName("label-name")[0].textContent.replace("Label:","").trim(),
+        'numberOfDiscs':null,
+        'isrc':null,
+        'tracks':Array.from(document.querySelectorAll("[id^=title-]")).map((item,index)=>(index+1)+'. '+item.textContent.trim()).join('\n'),
+        'description':document.getElementsByClassName("album-review")[0].textContent.trim(),     //可能获取到错误的描述
+        'imgUrl':document.getElementById("jacket-full-wrapper").children[0].getAttribute("data-src")
+    }
+    console.log(out);
+    return out;
 }
 
 let collectBandcampMeta=() =>{
@@ -337,6 +362,7 @@ switch(currentPage){
     case 'bandcamp':
     case 'discogs':
     case 'apple':
+    case 'ototoy':
     // case 'soundcloud':
         createButton(currentPage);
     case 'douban-1':

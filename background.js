@@ -9,6 +9,7 @@ let getActiveTab=()=> {
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) =>{
     console.log("received content message.");
     switch (msg.page){
+        case "ototoy":
         case "bandcamp":
         case "discogs":
         case "apple":
