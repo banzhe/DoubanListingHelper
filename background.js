@@ -17,7 +17,7 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) =>{
             console.log("Metadata received in background");
             meta=JSON.parse(msg.meta);
             if (meta['imgUrl']){
-                browser.downloads.download({'url': meta['imgUrl']}
+                browser.downloads.download({'url': meta['imgUrl'], 'filename': meta['album'].replace(/[/\:*?"<>]/,"")+'.jpg'}
                 ).then(
                     (id)=>{console.log('Image downloaded');}, 
                     (error)=>{console.log("Image download failed");}
