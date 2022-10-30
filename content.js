@@ -294,37 +294,33 @@ let collectAppleMeta=()=>{ // TODO
     for (const key of keys) out[key]=null;
 
     out['url']= document.URL;
-    out['album']=document.getElementsByClassName('album-header-metadata')[0].children[0].textContent.trim();
+    out['album']=document.getElementsByClassName("headings__title")[0].textContent.trim();
     out['barcode']=null;
-    out['artists']=[document.getElementsByClassName('album-header-metadata')[0].children[1].textContent.trim()];
-    let genre=document.getElementsByClassName('album-header-metadata')[0].children[2].textContent.trim().split("·")[0].trim();
-    const genreNameMap={'Dance':'Electronic','Hip-Hop':'Rap','HipHop':'Rap','Alternative':'Rock', "Hip-Hop/Rap":'Rap'};
-    if (genre && genreNameMap[genre]) out['genre']=genreNameMap[genre];
+    out['artists']=Array.from(document.querySelectorAll(".headings__subtitles a")).map((item)=>item.textContent);
+    // let genre=document.getElementsByClassName('album-header-metadata')[0].children[2].textContent.trim().split("·")[0].trim();
+    // const genreNameMap={'Dance':'Electronic','Hip-Hop':'Rap','HipHop':'Rap','Alternative':'Rock', "Hip-Hop/Rap":'Rap'};
+    // if (genre && genreNameMap[genre]) out['genre']=genreNameMap[genre];
+    out['genre']=null;
     out['releaseType']='Album'; // TODO
     out['media']='Digital';
-    out['date']=document.getElementsByClassName("bottom-metadata")[0].getElementsByClassName('song-released-container')[0].textContent.replace("RELEASED",'').trim() // TODO:convert
-    out['date']=formatDate(out['date']);
+    let dateAndLabelContent = document.querySelector('[data-testid="tracklist-footer-description"]').textContent;
+    out['date']=formatDate(dateAndLabelContent.match(/\d{4}年\d{1,2}月\d{1,2}日/)[0]) // TODO:convert
     try{
-        out['label']=document.getElementsByClassName("bottom-metadata")[0].getElementsByClassName('song-copyright')[0].textContent.replace(/℗ \d+ /,'');
+        out['label']=document.querySelector('[data-testid="tracklist-footer-description"]').textContent.replaceAll("\n","").replace(/.+℗ \d{4} /,"");
     } catch (err){}
-    out['numberOfDiscs']="1";
+    out['numberOfDiscs']=null;
 
     // tracks
-    let tracksText="";
-    let songs=document.getElementsByClassName("songs-list")[0].getElementsByClassName('song-name');
-    for (i=0;i<songs.length;i++){
-        tracksText+=`${i+1}. ${songs[i].textContent.trim()}\n`;
-    } 
-    out['tracks']=tracksText
+    out['tracks']=Array.from(document.getElementsByClassName("songs-list-row__song-wrapper")).map((item, index)=> (index+1)+'. '+item.textContent.trim()).join("\n");
 
-    out['description']=out['url']
-    try{
-        out['description']='\n\n'+document.getElementsByClassName('product-page-header')[0].getElementsByClassName('truncated-content-container')[0].textContent.replace(/Editors’ Notes/,'').trim()
-    } catch(err){}
+    try {
+        out['description']=document.querySelector('[data-testid="truncate-text"]').textContent.trim();
+    } catch(err) {
+        out['description']=null;
+    }
 
     try{
-        let _arr=document.getElementsByClassName('product-info')[0].getElementsByTagName('source')[1].srcset.split(" ");
-        out['imgUrl']=_arr[_arr.length-2];
+        out['imgUrl']=document.getElementsByClassName("artwork__radiosity")[0].querySelector('[type="image/jpeg"]').getAttribute("srcset").split(",").slice(-1)[0].match(/.*\.jpg/)[0];
     } catch(err){}
     return out;
 }
