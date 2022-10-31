@@ -162,6 +162,12 @@ let formatDate=(dateStr)=>{
     }
 }
 
+let checkUndefined=(data, nextFunction)=>{
+    if (data===undefined)
+        return null;
+    return nextFunction(data);
+}
+
 let collectMeta=(currentPage) => {
     switch (currentPage){
         case "bandcamp":
@@ -190,7 +196,7 @@ let collectOtotoyMeta=() => {
         'releaseType': 'Single',
         'media': 'Digital',
         'date': document.getElementsByClassName("release-day")[0].textContent.trim().match('\\d{4}-\\d{2}-\\d{2}')[0],
-        'label':document.getElementsByClassName("label-name")[0].textContent.replace("Label:","").trim(),
+        'label':checkUndefined(document.getElementsByClassName("label-name")[0],(item)=>item.textContent.replace("Label:","").trim()),
         'numberOfDiscs':null,
         'isrc':null,
         'tracks':Array.from(document.querySelectorAll("[id^=title-]")).map((item,index)=>(index+1)+'. '+item.textContent.trim()).join('\n'),
