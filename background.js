@@ -8,32 +8,30 @@ let getActiveTab=()=> {
 
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) =>{
     console.log("received content message.");
-    switch (msg.page){
-        case "ototoy":
-        case "bandcamp":
-        case "discogs":
-        case "apple":
-        // case "soundcloud": // TODO
-            console.log("Metadata received in background");
-            meta=JSON.parse(msg.meta);
-            if (meta['imgUrl']){
-                browser.downloads.download({'url': meta['imgUrl'], 'filename': meta['album'].replace(/[/\:*?"<>]/,"")+'.jpg'}
-                ).then(
-                    (id)=>{console.log('Image downloaded');}, 
-                    (error)=>{console.log("Image download failed");}
-                );
-            }
-    
-            break;
-        case "douban-1":
-            if (meta){
-                console.log("Douban-1 message received and meta is stored in background.")
-                getActiveTab().then((tabs) =>{
-                    browser.tabs.sendMessage(tabs[0].id, {'meta':JSON.stringify(meta)});
-                    meta=null;
-                });
-            }
-            break;
+    if (msg.page != 'douban-1') {
+        meta=JSON.parse(msg.meta);
+        downloadConfig = {'url': meta['imgUrl']};
+        switch (msg.page){
+            case "ototoy":
+            case "apple": 
+                downloadConfig['filename'] = meta['album'].replace(/[/\:*?"<>]/,"")+'.jpg'
+        }
+        console.log("Metadata received in background");
+        if (meta['imgUrl']){
+            browser.downloads.download( downloadConfig
+            ).then(
+                (id)=>{console.log('Image downloaded');}, 
+                (error)=>{console.log("Image download failed");}
+            );
+        }
+    } else {
+        if (meta){
+            console.log("Douban-1 message received and meta is stored in background.")
+            getActiveTab().then((tabs) =>{
+                browser.tabs.sendMessage(tabs[0].id, {'meta':JSON.stringify(meta)});
+                meta=null;
+            });
+        }
     }
 });
 
