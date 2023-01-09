@@ -200,7 +200,7 @@ let collectOtotoyMeta=() => {
         'numberOfDiscs':null,
         'isrc':null,
         'tracks':Array.from(document.querySelectorAll("[id^=title-]")).map((item,index)=>(index+1)+'. '+item.textContent.trim()).join('\n'),
-        'description':document.getElementsByClassName("album-review")[0].textContent.trim(),     //可能获取到错误的描述
+        'description':checkUndefined(document.getElementsByClassName("album-review")[0],(item)=> item.textContent.trim()),     //可能获取到错误的描述
         'imgUrl':document.getElementById("jacket-full-wrapper").children[0].getAttribute("data-src")
     }
     console.log(out);
@@ -317,7 +317,7 @@ let collectAppleMeta=()=>{ // TODO
     out['numberOfDiscs']=null;
 
     // tracks
-    out['tracks']=Array.from(document.getElementsByClassName("songs-list-row__song-wrapper")).map((item, index)=> (index+1)+'. '+item.textContent.trim()).join("\n");
+    out['tracks']=Array.from(document.getElementsByClassName("songs-list-row__song-wrapper")).map((item, index)=> (index+1)+'. '+item.innerText.split("\n")[0].trim()).join("\n");
 
     try {
         out['description']=document.querySelector('[data-testid="truncate-text"]').textContent.trim();
